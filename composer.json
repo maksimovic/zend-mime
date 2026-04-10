@@ -1,7 +1,12 @@
 {
-    "name": "zf1s/zend-mime",
+    "name": "maksimovic/zend-mime",
     "description": "Zend Framework 1 Mime package",
-    "keywords": ["framework", "zf1", "zend", "mime"],
+    "keywords": [
+        "framework",
+        "zf1",
+        "zend",
+        "mime"
+    ],
     "homepage": "http://framework.zend.com/",
     "license": "BSD-3-Clause",
     "require": {
