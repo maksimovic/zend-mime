@@ -98,4 +98,110 @@ EOD;
         $this->assertEquals('base64', $part2->encoding);
         $this->assertEquals('12', $part2->id);
     }
+
+    public function testGetPartHeadersArray(): void
+    {
+        $msg = new Zend_Mime_Message();
+        $part = new Zend_Mime_Part('Test content');
+        $part->type = 'text/plain';
+        $part->charset = 'UTF-8';
+        $part->encoding = Zend_Mime::ENCODING_8BIT;
+        $msg->addPart($part);
+
+        $headers = $msg->getPartHeadersArray(0);
+        $this->assertIsArray($headers);
+
+        $headerNames = array_column($headers, 0);
+        $this->assertContains('Content-Type', $headerNames);
+        $this->assertContains('Content-Transfer-Encoding', $headerNames);
+    }
+
+    public function testGetPartHeaders(): void
+    {
+        $msg = new Zend_Mime_Message();
+        $part = new Zend_Mime_Part('Test content');
+        $part->type = 'text/plain';
+        $part->encoding = Zend_Mime::ENCODING_8BIT;
+        $msg->addPart($part);
+
+        $headers = $msg->getPartHeaders(0);
+        $this->assertIsString($headers);
+        $this->assertStringContainsString('Content-Type: text/plain', $headers);
+        $this->assertStringContainsString('Content-Transfer-Encoding: 8bit', $headers);
+    }
+
+    public function testGetPartContent(): void
+    {
+        $msg = new Zend_Mime_Message();
+        $part = new Zend_Mime_Part('Test content');
+        $part->encoding = Zend_Mime::ENCODING_8BIT;
+        $msg->addPart($part);
+
+        $content = $msg->getPartContent(0);
+        $this->assertEquals('Test content', $content);
+    }
+
+    public function testGetPartContentBase64(): void
+    {
+        $msg = new Zend_Mime_Message();
+        $part = new Zend_Mime_Part('Hello World');
+        $part->encoding = Zend_Mime::ENCODING_BASE64;
+        $msg->addPart($part);
+
+        $content = $msg->getPartContent(0);
+        $this->assertEquals('Hello World', base64_decode($content));
+    }
+
+    public function testGenerateSinglePartMessage(): void
+    {
+        $msg = new Zend_Mime_Message();
+        $part = new Zend_Mime_Part('Single part content');
+        $part->encoding = Zend_Mime::ENCODING_8BIT;
+        $msg->addPart($part);
+
+        $result = $msg->generateMessage();
+        $this->assertEquals('Single part content', $result);
+    }
+
+    public function testCreateFromMessageThrowsOnUnknownHeader(): void
+    {
+        $text = <<<EOD
+preamble
+
+--=_boundary999
+Content-Type: text/plain
+X-Unknown-Header: some-value
+
+Body content
+--=_boundary999--
+EOD;
+        $this->expectException(Zend_Exception::class);
+        $this->expectExceptionMessage('Unknown header ignored for MimePart');
+        Zend_Mime_Message::createFromMessage($text, '=_boundary999');
+    }
+
+    public function testCreateFromMessageWithDescriptionLocationLanguage(): void
+    {
+        $text = <<<EOD
+This is a message in Mime Format.
+
+--=_boundary123
+Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+Content-Disposition: inline
+Content-Description: A test file
+Content-Location: http://example.com/test
+Content-Language: en
+
+Test body
+--=_boundary123--
+EOD;
+        $res = Zend_Mime_Message::createFromMessage($text, '=_boundary123');
+        $parts = $res->getParts();
+        $this->assertCount(1, $parts);
+        $this->assertEquals('A test file', $parts[0]->description);
+        $this->assertEquals('http://example.com/test', $parts[0]->location);
+        $this->assertEquals('en', $parts[0]->language);
+        $this->assertEquals('inline', $parts[0]->disposition);
+    }
 }
