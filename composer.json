@@ -1,13 +1,17 @@
 {
-    "name": "zf1s/zend-mime",
+    "name": "maksimovic/zend-mime",
     "description": "Zend Framework 1 Mime package",
     "keywords": ["framework", "zf1", "zend", "mime"],
     "homepage": "http://framework.zend.com/",
     "license": "BSD-3-Clause",
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=8.1",
         "ext-iconv": "*",
-        "zf1s/zend-exception": "^1.15.6"
+        "maksimovic/zend-exception": "^2.0.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "phpstan/phpstan": "^2.1"
     },
     "autoload": {
         "psr-0": {
@@ -15,11 +19,17 @@
         }
     },
     "replace": {
-        "zf1/zend-mime": "^1.12"
+        "zf1/zend-mime": "^1.12",
+        "zf1s/zend-mime": "^1.12"
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-text",
+        "phpstan": "phpstan analyse --memory-limit=256M"
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.x-dev"
+            "dev-master": "2.x-dev"
         }
     }
 }
